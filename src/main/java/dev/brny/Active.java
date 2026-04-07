@@ -24,7 +24,7 @@ public class Active {
                     String incoming;
                     while ((incoming = in.readLine()) != null) {
                         String cleaned = cleanup_msg(incoming);
-                        System.out.println("\r[A] " + cleaned + "     \n> ");
+                        System.out.println("\r[B] " + cleaned + "     \n> ");
                     }
                 } catch (IOException e) {
                     System.err.println("[ERROR] Connection lost with peer");

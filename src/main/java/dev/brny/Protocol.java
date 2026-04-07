@@ -7,5 +7,5 @@ public class Protocol {
 
     final static String header = name_header + version;
 
-    final static String version_mismatch = "VER_MISMATCH\n\n";
+    final static String version_mismatch = "VER_MISMATCH";
 }
