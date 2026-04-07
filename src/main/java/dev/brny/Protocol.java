@@ -5,7 +5,7 @@ public class Protocol {
     final static String version = "V0.1";
     final static String end = "\n\n";
 
-    final static String header = name_header + "\n" + version + end;
+    final static String header = name_header + version;
 
     final static String version_mismatch = "VER_MISMATCH\n\n";
 }

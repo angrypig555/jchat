@@ -26,19 +26,13 @@ public class Passive {
             if (Objects.equals(handshake, Protocol.header)) {
                 System.out.println("[WAIT] Handshake received, veryfing with peer. IP: " + c.getInetAddress().getHostAddress());
                 out.println(Protocol.header);
-                String handshake_reply = in.readLine();
-                if (Objects.equals(handshake_reply, Protocol.version_mismatch)) {
-                    System.err.println("[ERROR] Version mismatch!");
-                    stop();
-                }
                 System.out.println("[OK] Handshake OK, This is UNENCRYPTED TRAFFIC");
                 new Thread(() -> {
                     try {
                         String incoming;
                         while ((incoming = in.readLine()) != null) {
                             String cleaned = cleanup_msg(incoming);
-                            System.out.println("[B] " + cleaned);
-                            System.out.println(">");
+                            System.out.println("\r[A] " + cleaned + "     \n> ");
                         }
                     } catch (IOException e) {
                         System.err.println("[ERROR] Connection lost with peer");
@@ -58,6 +52,7 @@ public class Passive {
                 }
             } else {
                 System.err.println("[ERROR] Invalid handshake received from client on IP: " + c.getInetAddress().getHostAddress());
+                System.err.println("Expected: " + Protocol.header + "\nGot: " + handshake);
                 stop();
             }
 
