@@ -2,6 +2,10 @@ package dev.brny;
 
 import java.net.*;
 import java.io.*;
+import java.util.Objects;
+import java.util.Scanner;
+
+import dev.brny.Protocol;
 
 // This is the class for when the user is waiting for somebody to connect to them.
 
@@ -11,27 +15,65 @@ public class Passive {
     private PrintWriter out;
     private BufferedReader in;
 
-    public void start(int port) {
-        try {
+    public void start(int port) throws IOException {
+            System.out.println("[OK] Opening socket");
             s = new ServerSocket(port);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        try {
             c = s.accept();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        try {
+            System.out.println("[OK] Awaiting connection");
             out = new PrintWriter(c.getOutputStream(), true);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        try {
             in = new BufferedReader(new InputStreamReader(c.getInputStream()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            String handshake = in.readLine();
+            if (Objects.equals(handshake, Protocol.header)) {
+                System.out.println("[WAIT] Handshake received, veryfing with peer. IP: " + c.getInetAddress().getHostAddress());
+                out.println(Protocol.header);
+                String handshake_reply = in.readLine();
+                if (Objects.equals(handshake_reply, Protocol.version_mismatch)) {
+                    System.err.println("[ERROR] Version mismatch!");
+                    stop();
+                }
+                System.out.println("[OK] Handshake OK, This is UNENCRYPTED TRAFFIC");
+                new Thread(() -> {
+                    try {
+                        String incoming;
+                        while ((incoming = in.readLine()) != null) {
+                            String cleaned = cleanup_msg(incoming);
+                            System.out.println("[B] " + cleaned);
+                            System.out.println(">");
+                        }
+                    } catch (IOException e) {
+                        System.err.println("[ERROR] Connection lost with peer");
+                    }
+                }
+                ).start();
+                Scanner scan = new Scanner(System.in);
+                while (true) {
+                    System.out.print(">");
+                    String to_send = scan.nextLine();
+                    if (Objects.equals(to_send, "/exit")) {
+                        out.println(wrap_msg("Peer left"));
+                        stop();
+                        break;
+                    }
+                    out.println(wrap_msg(to_send));
+                }
+            } else {
+                System.err.println("[ERROR] Invalid handshake received from client on IP: " + c.getInetAddress().getHostAddress());
+                stop();
+            }
 
+    }
+    public void stop() throws IOException {
+        in.close();
+        out.close();
+        c.close();
+        s.close();
+    }
+    public String cleanup_msg(String message) {
+        int headerLen = Protocol.header.length();
+        return message.substring(headerLen, message.length() - headerLen);
+    }
+
+    public String wrap_msg(String message) {
+        return Protocol.header + message + Protocol.header;
     }
 }
