@@ -18,3 +18,11 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'dev.brny.Main' // Change this to your actual Main class path
+        )
+    }
+}
