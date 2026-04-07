@@ -15,7 +15,7 @@ public class Passive {
     private PrintWriter out;
     private BufferedReader in;
 
-    public void start(int port) throws IOException {
+    public void start(int port, String username) throws IOException {
             System.out.println("[OK] Opening socket");
             s = new ServerSocket(port);
             c = s.accept();
@@ -27,12 +27,17 @@ public class Passive {
                 System.out.println("[WAIT] Handshake received, veryfing with peer. IP: " + c.getInetAddress().getHostAddress());
                 out.println(Protocol.header);
                 System.out.println("[OK] Handshake OK, This is UNENCRYPTED TRAFFIC");
+                System.out.println("[WAIT] Waiting for peer nickname");
+                String other_user = in.readLine();
+                System.out.println("[OK] Received peer nickname: " + other_user);
+                System.out.println("[OK] Sending nickname: " + username);
+                out.println(username);
                 new Thread(() -> {
                     try {
                         String incoming;
                         while ((incoming = in.readLine()) != null) {
                             String cleaned = cleanup_msg(incoming);
-                            System.out.println("\r[A] " + cleaned + "     \n> ");
+                            System.out.println("\r("+ other_user + ") " + cleaned + "     \n> ");
                         }
                     } catch (IOException e) {
                         System.err.println("[ERROR] Connection lost with peer");

@@ -10,7 +10,7 @@ public class Active {
     private PrintWriter out;
     private BufferedReader in;
 
-    public void connect(String ip, int port) throws IOException {
+    public void connect(String ip, int port, String username) throws IOException {
         c = new Socket(ip, port);
         out = new PrintWriter(c.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(c.getInputStream()));
@@ -19,12 +19,17 @@ public class Active {
         String handshake = in.readLine();
         if (Objects.equals(handshake, Protocol.header)) {
             System.out.println("[OK] Handshake OK, This is UNENCRYPTED TRAFFIC");
+            System.out.println("[OK] Sending nickname: " + username);
+            out.println(username);
+            System.out.println("[WAIT] Waiting for peer nickname");
+            String other_user = in.readLine();
+            System.out.println("[OK] Received peer nickname: " + other_user);
             new Thread(() -> {
                 try {
                     String incoming;
                     while ((incoming = in.readLine()) != null) {
                         String cleaned = cleanup_msg(incoming);
-                        System.out.println("\r[B] " + cleaned + "     \n> ");
+                        System.out.println("\r(" + other_user + ") " + cleaned + "     \n> ");
                     }
                 } catch (IOException e) {
                     System.err.println("[ERROR] Connection lost with peer");
