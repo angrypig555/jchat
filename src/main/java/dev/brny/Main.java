@@ -37,8 +37,10 @@ public class Main {
                     server.start(5400, nick);
                 } catch (IOException e) {
                     System.err.println("[ERROR] Networking error! " + e);
+                    break; // BUG : connection fail = hammering. Fixed! again..
                 }
             } else {
+                System.out.println("That is not an option!")
                 return;
             }
         }
