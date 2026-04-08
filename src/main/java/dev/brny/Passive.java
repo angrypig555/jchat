@@ -24,16 +24,16 @@ public class Passive {
             c = s.accept();
             out = new PrintWriter(c.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(c.getInputStream()));
-            String handshake = in.readLine();
+            String handshake = msg.decode(in.readLine());
             if (Objects.equals(handshake, Protocol.header)) {
                 System.out.println("[WAIT] Handshake received, veryfing with peer. IP: " + c.getInetAddress().getHostAddress());
-                out.println(Protocol.header);
+                out.println(msg.encode(Protocol.header));
                 System.out.println("[OK] Handshake OK, This is UNENCRYPTED TRAFFIC");
                 System.out.println("[WAIT] Waiting for peer nickname");
-                String other_user = in.readLine();
+                String other_user = msg.decode(in.readLine());
                 System.out.println("[OK] Received peer nickname: " + other_user);
                 System.out.println("[OK] Sending nickname: " + username);
-                out.println(username);
+                out.println(msg.encode(username));
                 router.setCurr_peer_ip(c.getInetAddress().getHostAddress());
                 router.add_peer(c.getInetAddress().getHostAddress(), other_user);
                 router.add_peer(s.getInetAddress().getHostAddress(), username);

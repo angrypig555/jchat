@@ -18,14 +18,14 @@ public class Active {
         out = new PrintWriter(c.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(c.getInputStream()));
         System.out.println("[WAIT] Connected successfully, verifying handshake");
-        out.println(Protocol.header);
-        String handshake = in.readLine();
+        out.println(msg.encode(Protocol.header));
+        String handshake = msg.decode(in.readLine());
         if (Objects.equals(handshake, Protocol.header)) {
             System.out.println("[OK] Handshake OK, This is UNENCRYPTED TRAFFIC");
             System.out.println("[OK] Sending nickname: " + username);
-            out.println(username);
+            out.println(msg.encode(username));
             System.out.println("[WAIT] Waiting for peer nickname");
-            String other_user = in.readLine();
+            String other_user = msg.decode(in.readLine());
             System.out.println("[OK] Received peer nickname: " + other_user);
             router.setCurr_peer_ip(ip);
             router.add_peer(ip, other_user);

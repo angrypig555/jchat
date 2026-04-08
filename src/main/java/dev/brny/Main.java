@@ -9,12 +9,12 @@ public class Main {
         Passive server = new Passive();
         Active client = new Active();
         Router router = new Router();
-        System.out.println("jchat V0.3\n");
+        System.out.println("jchat V0.4\n");
         System.out.print("Please enter nickname: ");
         String nick = scan.nextLine();
         router.start_router();
         while (true) {
-            System.out.println("Would you like to\n1. connect to someone\n2. someone to connect to you?\n3. exit");
+            System.out.println("Would you like to\n1. connect to someone\n2. someone to connect to you?\n3. Discover other peers via router\n4. exit");
             String input = scan.nextLine();
             int number = 1;
             try {
@@ -37,6 +37,24 @@ public class Main {
                     server.start(5400, nick, router);
                 } catch (IOException e) {
                     System.err.println("[ERROR] Networking error! " + e);
+                }
+            } else if (number == 3) {
+                try {
+                    String address = router.print_peers();
+                    if (address == "no") {
+                        System.out.println("[WARNING] No known peers, currently in bootstrap mode. Please enter an ip of a known peer to get a list of IP's");
+                        String toscan = scan.nextLine();
+                        router.request_data(toscan);
+                        System.out.println("[INFO] Please choose option 3 again to connect to an IP via router");
+                    } else {
+                        try {
+                            client.connect(address, 5400, nick, router);
+                        } catch (IOException e) {
+                            System.err.println("[ERROR] Networking error! " + e);
+                        }
+                    }
+                } catch (IOException e) {
+                    System.err.println("[ROUTER] Networking error! " + e);
                 }
             } else {
                 return;

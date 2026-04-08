@@ -7,6 +7,7 @@ import dev.brny.Protocol;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Scanner;
 
 public class Router {
     ArrayList<String> known_peers = new ArrayList<>();
@@ -16,7 +17,7 @@ public class Router {
     //private PrintWriter out;
     //private BufferedReader in;
     private static volatile String curr_peer_ip = null;
-
+    MessageHandler msg = new MessageHandler();
     public void start_router() {
         new Thread(() -> {
             System.out.println("[ROUTER] Opening router socket");
@@ -57,24 +58,24 @@ public class Router {
             PrintWriter out = new PrintWriter(c.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(c.getInputStream()));
             System.out.println("[ROUTER] Verifying handshake; Router request from " + c.getInetAddress().getHostAddress());
-            String handshake = in.readLine();
+            String handshake = msg.decode(in.readLine());
             if (Objects.equals(handshake, Protocol.router_header)) {
-                out.println(Protocol.router_header);
+                out.println(msg.encode(Protocol.router_header));
                 String response = in.readLine();
                 if (Objects.equals(response, "OK")) {
                     System.out.println("[ROUTER] Sending " + c.getInetAddress().getHostAddress() + " known peers.");
-                    out.println(Protocol.router_header);
-                    out.println(known_peers.size());
+                    out.println(msg.encode(Protocol.router_header));
+                    out.println(msg.encode(String.valueOf(known_peers.size())));
                     for (String ip : known_peers) {
-                        out.println(ip);
+                        out.println(msg.encode(ip));
                         in.readLine();
                     }
-                    out.println("NICK");
+                    out.println(msg.encode("NICK"));
                     for (String nick : peer_names) {
-                        out.println(nick);
+                        out.println(msg.encode(nick));
                         in.readLine();
                     }
-                    out.println(Protocol.router_header);
+                    out.println(msg.encode(Protocol.router_header));
                 }
             } else {
                 System.err.println("[ROUTER] Invalid handshake\nExpected: " + Protocol.router_header + "\nGot: " + handshake);
@@ -90,41 +91,41 @@ public class Router {
         out = new PrintWriter(c.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(c.getInputStream()));
         System.out.println("[ROUTER] Sending handshake to " + c.getInetAddress().getHostAddress());
-        out.println(Protocol.router_header);
-        String response = in.readLine();
+        out.println(msg.encode(Protocol.router_header));
+        String response = msg.decode(in.readLine());
         if (Objects.equals(response, Protocol.router_header)) {
             out.println("OK");
             System.out.println("[ROUTER] Handshake verified, receiving peers");
-            String first_header = in.readLine();
+            String first_header = msg.decode(in.readLine());
             if (!Objects.equals(first_header, Protocol.router_header)) {
                 System.err.println("[ROUTER] Unexpected behaviour from peer, disconnecting");
                 c.close();
                 return;
             }
-            String size_string = in.readLine();
+            String size_string = msg.decode(in.readLine());
             int size = Integer.parseInt(size_string);
             int nick_size = size;
             while (size > 0) {
-                String read_data = in.readLine();
+                String read_data = msg.decode(in.readLine());
                 if (known_peers.contains(read_data)) {
                     --size;
-                    out.println("OK");
+                    out.println(msg.encode("OK"));
                     continue;
                 }
                 known_peers.add(read_data);
-                out.println("OK");
+                out.println(msg.encode("OK"));
                 --size;
             }
-            String separator = in.readLine();
+            String separator = msg.decode(in.readLine());
             if (!Objects.equals(separator, "NICK")) {
                 System.err.println("[ROUTER] Unexpected behaviour from peer, disconnecting.");
                 c.close();
                 return;
             }
             while (nick_size > 0) {
-                String read_data = in.readLine();
+                String read_data = msg.decode(in.readLine());
                 peer_names.add(read_data);
-                out.println("OK");
+                out.println(msg.encode("OK"));
                 --nick_size;
             }
             String last_header = in.readLine();
@@ -143,5 +144,25 @@ public class Router {
     }
     public void setCurr_peer_ip(String ip) {
         Router.curr_peer_ip = ip;
+    }
+    public String print_peers() throws IOException {
+        if (!known_peers.isEmpty()) {
+            int numcounter = 1;
+            for (String ips : known_peers) {
+                int index = known_peers.indexOf(ips);
+                String nick = peer_names.get(index);
+                System.out.println(numcounter + ". " + ips + " - " + nick);
+                ++numcounter;
+            }
+            Scanner scan = new Scanner(System.in);
+            System.out.print("Please select an IP: ");
+            String selected = scan.nextLine();
+            int sel = Integer.parseInt(selected);
+            return known_peers.get(sel);
+        } else {
+            System.out.println("[ROUTER] No other peers, currently in bootstrap mode");
+            return "no";
+        }
+
     }
 }
