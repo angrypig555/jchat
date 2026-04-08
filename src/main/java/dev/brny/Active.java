@@ -52,11 +52,13 @@ public class Active {
             stop();
         }
     }
+    // will be relocated soon
+    @Deprecated(forRemoval = true, since = "V0.2")
     public String cleanup_msg(String message) {
         int headerLen = Protocol.header.length();
         return message.substring(headerLen, message.length() - headerLen);
     }
-
+    @Deprecated(forRemoval = true, since = "V0.2")
     public String wrap_msg(String message) {
         return Protocol.header + message + Protocol.header;
     }

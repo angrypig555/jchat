@@ -68,11 +68,14 @@ public class Passive {
         c.close();
         s.close();
     }
+    // relocation soon
+    @Deprecated(forRemoval = true, since = "V0.2")
     public String cleanup_msg(String message) {
         int headerLen = Protocol.header.length();
         return message.substring(headerLen, message.length() - headerLen);
     }
-
+    // relocation soon
+    @Deprecated(forRemoval = true, since = "V0.2")
     public String wrap_msg(String message) {
         return Protocol.header + message + Protocol.header;
     }
