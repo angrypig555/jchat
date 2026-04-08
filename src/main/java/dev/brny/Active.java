@@ -13,6 +13,7 @@ public class Active {
 
     public void connect(String ip, int port, String username) throws IOException {
         MessageHandler msg = new MessageHandler();
+        Router router = new Router();
         c = new Socket(ip, port);
         out = new PrintWriter(c.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(c.getInputStream()));

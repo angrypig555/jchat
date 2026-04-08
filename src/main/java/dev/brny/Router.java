@@ -15,13 +15,27 @@ public class Router {
     private Socket c;
     private PrintWriter out;
     private BufferedReader in;
+    private volatile String curr_peer_ip = null;
 
     public void start_router() {
         new Thread(() -> {
-            try {
-                route();
-            } catch (IOException e) {
-                System.err.println("[ROUTER] Router error! " + e);
+            while (true) {
+                try {
+                    route();
+                } catch (SocketTimeoutException e2) {
+                    if (curr_peer_ip != null) {
+                        System.out.println("[ROUTER] No incoming requests, refreshing list");
+                        try {
+                            request_data(curr_peer_ip);
+                        } catch (IOException ie) {
+                            System.err.println("[ROUTER] Error while refreshing list " + ie);
+                        }
+                    } else {
+                        System.out.println("[ROUTER] No ip to contact, in bootstrap mode.");
+                    }
+                } catch (IOException e) {
+                    System.err.println("[ROUTER] Router error! " + e);
+                }
             }
         }
         ).start();
@@ -31,6 +45,7 @@ public class Router {
         MessageHandler msg = new MessageHandler();
         System.out.println("[ROUTER] Opening router socket");
         s = new ServerSocket(5401);
+        s.setSoTimeout(20000);
         while (true) {
             c = s.accept();
             System.out.println("[ROUTER] Verifying handshake; Router request from " + c.getInetAddress().getHostAddress());
@@ -106,5 +121,14 @@ public class Router {
             System.out.println("[ROUTER] Succesfully updated list of peers, disconnecting from peer.");
             c.close();
         }
+    }
+    public void add_peer(String ip, String nick) {
+        known_peers.add(ip);
+        peer_names.add(nick);
+    }
+    public void remove_peer(String ip) {
+        int index = known_peers.indexOf(ip);
+        known_peers.remove(index);
+        peer_names.remove(index);
     }
 }
