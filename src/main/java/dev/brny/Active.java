@@ -5,12 +5,14 @@ import java.io.*;
 import java.util.Objects;
 import java.util.Scanner;
 
+
 public class Active {
     private Socket c;
     private PrintWriter out;
     private BufferedReader in;
 
     public void connect(String ip, int port, String username) throws IOException {
+        MessageHandler msg = new MessageHandler();
         c = new Socket(ip, port);
         out = new PrintWriter(c.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(c.getInputStream()));
@@ -28,7 +30,7 @@ public class Active {
                 try {
                     String incoming;
                     while ((incoming = in.readLine()) != null) {
-                        String cleaned = cleanup_msg(incoming);
+                        String cleaned = msg.cleanup_msg(incoming);
                         System.out.println("\r(" + other_user + ") " + cleaned + "     \n> ");
                     }
                 } catch (IOException e) {
@@ -41,26 +43,16 @@ public class Active {
                 System.out.print(">");
                 String to_send = scan.nextLine();
                 if (Objects.equals(to_send, "/exit")) {
-                    out.println(wrap_msg("Peer left"));
+                    out.println(msg.wrap_msg("Peer left"));
                     stop();
                     break;
                 }
-                out.println(wrap_msg(to_send));
+                out.println(msg.wrap_msg(to_send));
             }
         } else {
             System.err.println("[ERROR] Handshake mismatch!");
             stop();
         }
-    }
-    // will be relocated soon
-    @Deprecated(forRemoval = true, since = "V0.2")
-    public String cleanup_msg(String message) {
-        int headerLen = Protocol.header.length();
-        return message.substring(headerLen, message.length() - headerLen);
-    }
-    @Deprecated(forRemoval = true, since = "V0.2")
-    public String wrap_msg(String message) {
-        return Protocol.header + message + Protocol.header;
     }
 
     public void stop() throws IOException {

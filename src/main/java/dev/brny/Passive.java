@@ -16,6 +16,7 @@ public class Passive {
     private BufferedReader in;
 
     public void start(int port, String username) throws IOException {
+            MessageHandler msg = new MessageHandler();
             System.out.println("[OK] Opening socket");
             s = new ServerSocket(port);
             c = s.accept();
@@ -36,7 +37,7 @@ public class Passive {
                     try {
                         String incoming;
                         while ((incoming = in.readLine()) != null) {
-                            String cleaned = cleanup_msg(incoming);
+                            String cleaned = msg.cleanup_msg(incoming);
                             System.out.println("\r("+ other_user + ") " + cleaned + "     \n> ");
                         }
                     } catch (IOException e) {
@@ -49,11 +50,11 @@ public class Passive {
                     System.out.print(">");
                     String to_send = scan.nextLine();
                     if (Objects.equals(to_send, "/exit")) {
-                        out.println(wrap_msg("Peer left"));
+                        out.println(msg.wrap_msg("Peer left"));
                         stop();
                         break;
                     }
-                    out.println(wrap_msg(to_send));
+                    out.println(msg.wrap_msg(to_send));
                 }
             } else {
                 System.err.println("[ERROR] Invalid handshake received from client on IP: " + c.getInetAddress().getHostAddress());
@@ -69,14 +70,4 @@ public class Passive {
         s.close();
     }
     // relocation soon
-    @Deprecated(forRemoval = true, since = "V0.2")
-    public String cleanup_msg(String message) {
-        int headerLen = Protocol.header.length();
-        return message.substring(headerLen, message.length() - headerLen);
-    }
-    // relocation soon
-    @Deprecated(forRemoval = true, since = "V0.2")
-    public String wrap_msg(String message) {
-        return Protocol.header + message + Protocol.header;
-    }
 }
