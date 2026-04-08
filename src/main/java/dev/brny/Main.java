@@ -26,10 +26,10 @@ public class Main {
                 System.out.print("Please enter IP of peer: ");
                 String peer_ip = scan.nextLine();
                 try {
-
                     client.connect(peer_ip, 5400, nick);
                 } catch (IOException e) {
                     System.err.println("[ERROR] Networking error!" + e);
+                    break; // BUG : connection fail = hammering. Fixed!
                 }
             } else if (number == 2) {
                 System.out.println("[WAIT] Starting in passive mode...");
