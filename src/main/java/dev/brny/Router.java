@@ -9,49 +9,57 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class Router {
-    ArrayList<String> known_peers;
-    ArrayList<String> peer_names;
-    private ServerSocket s;
-    private Socket c;
-    private PrintWriter out;
-    private BufferedReader in;
-    private volatile String curr_peer_ip = null;
+    ArrayList<String> known_peers = new ArrayList<>();
+    ArrayList<String> peer_names = new ArrayList<>();
+    //private ServerSocket s;
+    //private Socket c;
+    //private PrintWriter out;
+    //private BufferedReader in;
+    private static volatile String curr_peer_ip = null;
 
     public void start_router() {
         new Thread(() -> {
-            while (true) {
-                try {
-                    route();
-                } catch (SocketTimeoutException e2) {
-                    if (curr_peer_ip != null) {
-                        System.out.println("[ROUTER] No incoming requests, refreshing list");
-                        try {
-                            request_data(curr_peer_ip);
-                        } catch (IOException ie) {
-                            System.err.println("[ROUTER] Error while refreshing list " + ie);
+            System.out.println("[ROUTER] Opening router socket");
+            try (ServerSocket s = new ServerSocket(5401)) {
+                s.setSoTimeout(20000);
+                int error_counter = 0;
+                while (error_counter < 4) {
+                    try {
+                        route(s);
+                    } catch (SocketTimeoutException e2) {
+                        if (curr_peer_ip != null) {
+                            System.out.println("[ROUTER] No incoming requests, refreshing list");
+                            try {
+                                request_data(curr_peer_ip);
+                            } catch (IOException ie) {
+                                System.err.println("[ROUTER] Error while refreshing list " + ie);
+                            }
+                        } else {
+                            System.out.println("[ROUTER] No ip to contact, in bootstrap mode.");
                         }
-                    } else {
-                        System.out.println("[ROUTER] No ip to contact, in bootstrap mode.");
+                    } catch (IOException e) {
+                        System.err.println("[ROUTER] Router error! " + e);
+                        ++error_counter;
                     }
-                } catch (IOException e) {
-                    System.err.println("[ROUTER] Router error! " + e);
                 }
+            } catch (IOException e) {
+                System.out.println("[ROUTER] Could not bind to port! " + e);
             }
         }
         ).start();
     }
 
-    public void route() throws IOException {
+    public void route(ServerSocket s) throws IOException {
         MessageHandler msg = new MessageHandler();
-        System.out.println("[ROUTER] Opening router socket");
-        s = new ServerSocket(5401);
-        s.setSoTimeout(20000);
-        while (true) {
-            c = s.accept();
+
+
+            Socket c = s.accept();
+            PrintWriter out = new PrintWriter(c.getOutputStream(), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(c.getInputStream()));
             System.out.println("[ROUTER] Verifying handshake; Router request from " + c.getInetAddress().getHostAddress());
             String handshake = in.readLine();
             if (Objects.equals(handshake, Protocol.router_header)) {
-                out.println(Protocol.header);
+                out.println(Protocol.router_header);
                 String response = in.readLine();
                 if (Objects.equals(response, "OK")) {
                     System.out.println("[ROUTER] Sending " + c.getInetAddress().getHostAddress() + " known peers.");
@@ -72,11 +80,13 @@ public class Router {
                 System.err.println("[ROUTER] Invalid handshake\nExpected: " + Protocol.router_header + "\nGot: " + handshake);
                 c.close();
             }
-        }
+
     }
     public void request_data(String ip_address) throws IOException {
+        Socket c = new Socket(ip_address, 5401);
+        PrintWriter out = new PrintWriter(c.getOutputStream(), true);
+        BufferedReader in = new BufferedReader(new InputStreamReader(c.getInputStream()));
         System.out.println("[ROUTER] Requesting data from peer");
-        c = new Socket(ip_address, 5401);
         out = new PrintWriter(c.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(c.getInputStream()));
         System.out.println("[ROUTER] Sending handshake to " + c.getInetAddress().getHostAddress());
@@ -132,6 +142,6 @@ public class Router {
         peer_names.remove(index);
     }
     public void setCurr_peer_ip(String ip) {
-        this.curr_peer_ip = ip;
+        Router.curr_peer_ip = ip;
     }
 }

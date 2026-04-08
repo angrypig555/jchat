@@ -15,12 +15,13 @@ public class Passive {
     private PrintWriter out;
     private BufferedReader in;
 
-    public void start(int port, String username) throws IOException {
+    public void start(int port, String username, Router router) throws IOException {
             MessageHandler msg = new MessageHandler();
             System.out.println("[OK] Opening socket");
             s = new ServerSocket(port);
-            c = s.accept();
+            System.out.println("[INFO] IP: " + s.getInetAddress().getHostAddress());
             System.out.println("[OK] Awaiting connection");
+            c = s.accept();
             out = new PrintWriter(c.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(c.getInputStream()));
             String handshake = in.readLine();
@@ -33,6 +34,9 @@ public class Passive {
                 System.out.println("[OK] Received peer nickname: " + other_user);
                 System.out.println("[OK] Sending nickname: " + username);
                 out.println(username);
+                router.setCurr_peer_ip(c.getInetAddress().getHostAddress());
+                router.add_peer(c.getInetAddress().getHostAddress(), other_user);
+                router.add_peer(s.getInetAddress().getHostAddress(), username);
                 new Thread(() -> {
                     try {
                         String incoming;

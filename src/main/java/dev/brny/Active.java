@@ -11,7 +11,7 @@ public class Active {
     private PrintWriter out;
     private BufferedReader in;
 
-    public void connect(String ip, int port, String username) throws IOException {
+    public void connect(String ip, int port, String username, Router router) throws IOException {
         MessageHandler msg = new MessageHandler();
 
         c = new Socket(ip, port);
@@ -27,6 +27,9 @@ public class Active {
             System.out.println("[WAIT] Waiting for peer nickname");
             String other_user = in.readLine();
             System.out.println("[OK] Received peer nickname: " + other_user);
+            router.setCurr_peer_ip(ip);
+            router.add_peer(ip, other_user);
+            router.add_peer(c.getInetAddress().getHostAddress(), username);
             new Thread(() -> {
                 try {
                     String incoming;

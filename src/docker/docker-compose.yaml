@@ -1,0 +1,11 @@
+services:
+  jchat:
+    image: angrypig555/jchat
+    networks:
+      - jchat-test-network
+    stdin_open: true
+    tty: true
+
+networks:
+  jchat-test-network:
+    driver: bridge
