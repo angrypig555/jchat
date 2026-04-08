@@ -131,4 +131,7 @@ public class Router {
         known_peers.remove(index);
         peer_names.remove(index);
     }
+    public void setCurr_peer_ip(String ip) {
+        this.curr_peer_ip = ip;
+    }
 }
