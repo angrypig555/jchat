@@ -2,8 +2,7 @@ package dev.brny;
 
 public class Protocol {
     final static String name_header = "JCHAT";
-    final static String version = "V0.4";
-    final static String end = "\n\n";
+    final static String version = "V0.5";
 
     final static String header = name_header + version;
 
@@ -11,6 +10,8 @@ public class Protocol {
 
     final static String router_header = "JCHROUTER" + version;
     final static String b64_header = "JCHATB64";
+
+    final static String key_header = "JCHATKEY" + version;
 }
 
 // PROTOCOL LAYOUT:
@@ -24,11 +25,11 @@ public class Protocol {
 // JCHATB64base_64_msg
 // Header | Base64
 
-
 // V0.1 - Beta protocol, no usernames
 // V0.2 - Second iteration of the beta protocol, now with usernames
 // V0.3 - Third iteration of the beta protocol, now with peer discovery
 // V0.4 - Fourth iteration of the beta protocol, uses base 64 encoding for message integrity
+// V0.5 - Fifth iteration of the beta protocol, with encryption
 // Ports used:
 // 5400 - Port for connecting and communicating with peers
 // 5401 - Port used for the router

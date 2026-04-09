@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'com.gradleup.shadow' version '9.3.0'
 }
 
 group = 'dev.brny'
@@ -14,6 +15,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'com.google.crypto.tink:tink:1.21.0'
+
 }
 
 test {
