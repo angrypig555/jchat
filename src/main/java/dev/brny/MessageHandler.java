@@ -63,10 +63,15 @@ public class MessageHandler {
         return Protocol.b64_header + encoded + Protocol.b64_header;
     }
     public String decode(String message_raw) {
-        int headerLen = Protocol.b64_header.length();
-        String message =  message_raw.substring(headerLen, message_raw.length() - headerLen);
-        byte[] decoded = Base64.getDecoder().decode(message);
-        return new String(decoded, StandardCharsets.ISO_8859_1);
+        try {
+            int headerLen = Protocol.b64_header.length();
+            String message = message_raw.substring(headerLen, message_raw.length() - headerLen);
+            byte[] decoded = Base64.getDecoder().decode(message);
+            return new String(decoded, StandardCharsets.ISO_8859_1);
+        } catch (StringIndexOutOfBoundsException e) {
+            System.err.println("[ERROR] Invalid handshake");
+            return null;
+        }
     }
     public void crypt_init() throws GeneralSecurityException {
         System.out.println("[OK] Generating encryption keypair");
