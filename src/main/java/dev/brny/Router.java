@@ -3,7 +3,6 @@ package dev.brny;
 
 import java.net.*;
 import java.io.*;
-import dev.brny.Protocol;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -12,10 +11,7 @@ import java.util.Scanner;
 public class Router {
     ArrayList<String> known_peers = new ArrayList<>();
     ArrayList<String> peer_names = new ArrayList<>();
-    //private ServerSocket s;
-    //private Socket c;
-    //private PrintWriter out;
-    //private BufferedReader in;
+    // removed unused commented out code
     private static volatile String curr_peer_ip = null;
     MessageHandler msg = new MessageHandler();
     public void start_router() {
@@ -129,7 +125,7 @@ public class Router {
                 --nick_size;
             }
             String last_header = in.readLine();
-            System.out.println("[ROUTER] Succesfully updated list of peers, disconnecting from peer.");
+            System.out.println("[ROUTER] Successfully updated list of peers, disconnecting from peer.");
             c.close();
         }
     }
@@ -137,6 +133,8 @@ public class Router {
         known_peers.add(ip);
         peer_names.add(nick);
     }
+    @SuppressWarnings("unused")
+    // to be used in a later version
     public void remove_peer(String ip) {
         int index = known_peers.indexOf(ip);
         known_peers.remove(index);

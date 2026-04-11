@@ -1,6 +1,7 @@
 package dev.brny;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Objects;
 import java.util.Scanner;
 
 
@@ -49,7 +50,7 @@ public class Main {
             } else if (number == 3) {
                 try {
                     String address = router.print_peers();
-                    if (address == "no") {
+                    if (Objects.equals(address, "no")) {
                         System.out.println("[WARNING] No known peers, currently in bootstrap mode. Please enter an ip of a known peer to get a list of IP's");
                         String toscan = scan.nextLine();
                         router.request_data(toscan);

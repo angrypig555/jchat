@@ -6,7 +6,6 @@ import java.security.GeneralSecurityException;
 import java.util.Objects;
 import java.util.Scanner;
 
-import dev.brny.Protocol;
 
 // This is the class for when the user is waiting for somebody to connect to them.
 
