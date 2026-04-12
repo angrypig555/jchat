@@ -13,6 +13,9 @@ public class Protocol {
     final static String b64_header = "JCHATB64";
 
     final static String key_header = "JCHATKEY" + version;
+
+    final static String file_header = "JCHFILE_CHUNK"; // + chunk
+    final static String file_request = "JCHFILE_REQUEST"; // + hash
 }
 
 // PROTOCOL LAYOUT:
@@ -31,7 +34,8 @@ public class Protocol {
 // V0.3 - Third iteration of the beta protocol, now with peer discovery
 // V0.4 - Fourth iteration of the beta protocol, uses base 64 encoding for message integrity
 // V0.5 - Fifth iteration of the beta protocol, with encryption
-// V0.6 - Sixth iteration of the beta protocol, with asking for the key every few seconds.
+// V0.6 - Sixth iteration of the beta protocol, with asking for the key every few seconds and file sharing.
 // Ports used:
 // 5400 - Port for connecting and communicating with peers
 // 5401 - Port used for the router
+// 5402 - Used for file sharing

@@ -77,7 +77,7 @@ public class Router {
                 System.err.println("[ROUTER] Invalid handshake\nExpected: " + Protocol.router_header + "\nGot: " + handshake);
                 c.close();
             }
-
+    
     }
     public void request_data(String ip_address) throws IOException {
         Socket c = new Socket(ip_address, 5401);
