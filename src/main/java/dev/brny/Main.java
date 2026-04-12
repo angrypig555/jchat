@@ -1,4 +1,5 @@
 package dev.brny;
+import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Objects;
@@ -12,6 +13,7 @@ public class Main {
         Active client = new Active();
         Router router = new Router();
         MessageHandler msg = new MessageHandler();
+        FileHandler fh = new FileHandler();
         System.out.println("jchat V0.5\n");
         System.out.print("Please enter nickname: ");
         String nick = scan.nextLine();
@@ -23,7 +25,7 @@ public class Main {
             return;
         }
         while (true) {
-            System.out.println("Would you like to\n1. connect to someone\n2. someone to connect to you?\n3. Discover other peers via router\n4. exit");
+            System.out.println("Would you like to\n1. connect to someone\n2. someone to connect to you?\n3. Discover other peers via router\n4. Host a file\n 5. Download a file\n 6. Exit");
             String input = scan.nextLine();
             int number = 1;
             try {
@@ -64,6 +66,21 @@ public class Main {
                     }
                 } catch (IOException e) {
                     System.err.println("[ROUTER] Networking error! " + e);
+                }
+            } else if (number == 4) {
+                System.out.print("Please enter path to file (e.g C:... or /home/foo/... ): ");
+                String path_in = scan.nextLine();
+                File path = new File(path_in);
+                fh.start_share(path);
+            } else if (number == 5) {
+              System.out.print("Please enter directory to save to (e.g C:... or /home/foo/...): ");
+              String path_in = scan.nextLine();
+              System.out.print("Please enter hash of file: ");
+              String hash_raw = scan.nextLine();
+                try {
+                    fh.get_data(router, hash_raw, path_in);
+                } catch (IOException e) {
+                    System.err.println("[FILE] Error: " + e);
                 }
             } else {
                 return;

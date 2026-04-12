@@ -27,14 +27,14 @@ public class FileHandler {
             String handshake = read_tostring(in);
             if (!Objects.equals(handshake, Protocol.header)) {
                 c.close();
-                return;
+                continue;
             }
             send_string(out, Protocol.header);
             HashCode requested_hash = HashCode.fromBytes(read(in));
             if (!requested_hash.equals(main_hash)) {
                 send_string(out, "NOT_HERE");
                 c.close();
-                return;
+                continue;
             } else {
                 send_string(out, "HERE");
             }
@@ -83,7 +83,8 @@ public class FileHandler {
         in.readFully(buffer);
         return buffer;
     }
-    public void get_data(Router router, HashCode hash_to_get, String path) throws IOException {
+    public void get_data(Router router, String raw_hash, String path) throws IOException {
+        HashCode hash_to_get = HashCode.fromString(raw_hash);
         for (String ip : router.known_peers) {
             try (Socket c = new Socket()) {
                 SocketAddress addr = new InetSocketAddress(ip, 5402);
@@ -145,5 +146,17 @@ public class FileHandler {
     }
     public byte[] hash(byte[] file_chunk) {
         return Hashing.sha256().hashBytes(file_chunk).asBytes();
+    }
+    public void start_share(File file) {
+        Thread thread = new Thread(() -> {
+            try {
+                share(file);
+            } catch (IOException e) {
+                System.err.println("[FILE] Error: " + e);
+            }
+        }
+
+        );
+        thread.start();
     }
 }
