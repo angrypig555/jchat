@@ -14,7 +14,6 @@ import java.nio.file.Paths;
 // Filehandler.java - JChat Filesharing handler
 
 public class FileHandler {
-    private ArrayList<String> hashes = new ArrayList<>();
     public void share(File file) throws IOException {
         HashCode main_hash = Files.asByteSource(file).hash(Hashing.sha256());
         System.out.println("[FILE] Hosting hash: " + main_hash.toString());

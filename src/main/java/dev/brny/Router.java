@@ -14,12 +14,13 @@ public class Router {
     // removed unused commented out code
     private static volatile String curr_peer_ip = null;
     MessageHandler msg = new MessageHandler();
+    // lots of logs here, will implement a logging library later on
     public void start_router() {
-        new Thread(() -> {
+        new Thread(() -> { // seperate thread so we dont block other functions
             System.out.println("[ROUTER] Opening router socket");
             try (ServerSocket s = new ServerSocket(5401)) {
                 s.setSoTimeout(20000);
-                int error_counter = 0;
+                int error_counter = 0; // counts the error, this part is prone to crashing
                 while (error_counter < 4) {
                     try {
                         route(s);
@@ -51,7 +52,7 @@ public class Router {
 
 
             Socket c = s.accept();
-            PrintWriter out = new PrintWriter(c.getOutputStream(), true);
+            PrintWriter out = new PrintWriter(c.getOutputStream(), true); // printwriter and bufferedreader for reading input, will move away later to a better method
             BufferedReader in = new BufferedReader(new InputStreamReader(c.getInputStream()));
             System.out.println("[ROUTER] Verifying handshake; Router request from " + c.getInetAddress().getHostAddress());
             String handshake = msg.decode(in.readLine());
