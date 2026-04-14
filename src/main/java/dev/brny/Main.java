@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.logging.Level;
 
 
 public class Main {
@@ -22,6 +23,7 @@ public class Main {
             msg.crypt_init();
         } catch (GeneralSecurityException e) {
             System.err.println("[ERROR] Failed to initialize keys!");
+            Log.get().log(Level.SEVERE, "Failed to initialize keys!");
             return;
         }
         while (true) {
@@ -36,11 +38,13 @@ public class Main {
             if (number == 1) {
                 System.out.print("Please enter IP of peer: ");
                 String peer_ip = scan.nextLine();
+                Log.get().log(Level.INFO, "Connecting to " + peer_ip);
                 try {
 
                     client.connect(peer_ip, 5400, nick, router, msg);
                 } catch (IOException e) {
-                    System.err.println("[ERROR] Networking error!" + e);
+                    System.err.println("[ERROR] Networking error! " + e);
+                    Log.get().log(Level.SEVERE, "Networking error! " + e);
                 }
             } else if (number == 2) {
                 System.out.println("[WAIT] Starting in passive mode...");
