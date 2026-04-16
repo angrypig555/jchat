@@ -12,7 +12,7 @@ public class Log {
     private static Logger logger;
     public static void setup() {
         logger = Logger.getLogger("dev.brny");
-
+        logger.setUseParentHandlers(false);
         try {
             String tempDir = System.getProperty("java.io.tmpdir");
             String logFilePath = tempDir + File.separator + "jchat.log";

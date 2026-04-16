@@ -14,6 +14,7 @@ import com.google.crypto.tink.hybrid.HybridEncryptFactory;
 import com.google.crypto.tink.hybrid.HybridKeyTemplates;
 import com.google.crypto.tink.JsonKeysetWriter;
 
+import java.util.logging.Level;
 
 public class MessageHandler {
     // define all the keys so we can use them later
@@ -28,23 +29,27 @@ public class MessageHandler {
         try {
             // first we decode b64
             if (!message_raw.contains((Protocol.b64_header))) {
+                Log.get().log(Level.WARNING, "Message did not contain header");
                 return null;
             }
             // we remove the headers
             String decoded_msg = decode(message_raw);
             int headerLen = Protocol.header.length();
             if (decoded_msg.length() < (headerLen * 2)) {
+                Log.get().log(Level.WARNING, "Message was not long enough to contain header after decoding");
                 return null;
             }
             String ciphertext = decoded_msg.substring(headerLen, decoded_msg.length() - headerLen);
             // then we decrypt it
             String result = decrypt(ciphertext);
             if (Objects.equals(result, "DEC_FAIL_ERR")) {
+                Log.get().log(Level.SEVERE, "Message could not be decoded!");
                 return null;
                 // this should usually not happen, instead it would throw an exception
             }
             return result;
         } catch (Exception e) {
+            Log.get().log(Level.WARNING, "Bad packet received");
             System.err.println("[WARN] Bad packet received, there may be a man in the middle, disconnection is advised");
             // usually this never happens, if it happens tho something really went wrong, mainly a man can be in the middle
             return null;
@@ -83,6 +88,7 @@ public class MessageHandler {
             byte[] decoded = Base64.getDecoder().decode(message);
             return new String(decoded, StandardCharsets.ISO_8859_1);
         } catch (StringIndexOutOfBoundsException e) {
+            Log.get().log(Level.SEVERE, "Invalid handshake " + e);
             System.err.println("[ERROR] Invalid handshake");
             return null;
             // usually this is because of a version mismatch, or just garbage data
@@ -110,6 +116,7 @@ public class MessageHandler {
             return new String(ciphertext, StandardCharsets.ISO_8859_1);
         } catch (GeneralSecurityException e) {
             System.err.println("[ERROR] Encryption failed " + e);
+            Log.get().log(Level.SEVERE, "Encryption failed " + e);
             return "ENC_FAIL_ERR";
             // same as exporting keys, if this fails its either a problem in the code or somehow the pubkey got corrupted in ram
         }
@@ -126,6 +133,7 @@ public class MessageHandler {
             return new String(decrypted, StandardCharsets.UTF_8);
         } catch (GeneralSecurityException e) {
             System.err.println("[ERROR] Decryption failed " + e);
+            Log.get().log(Level.SEVERE, "Decryption failed! " + e);
             return "DEC_FAIL_ERR";
         }
     }
@@ -139,6 +147,7 @@ public class MessageHandler {
             return outputStream.toString();
         } catch (IOException e) {
             System.err.println("[ERROR] Failed to export public key " + e);
+            Log.get().log(Level.SEVERE, "Failed to export public key " + e);
             // this should not really happen, if it happens tho then something went really really wrong with tink.
             return "ENC_FAIL_ERR";
         }
@@ -149,6 +158,7 @@ public class MessageHandler {
             curr_pubkey = CleartextKeysetHandle.read(JsonKeysetReader.withString(key));
         } catch (GeneralSecurityException | IOException e) {
             System.err.println("[ERROR] Error while decoding peer's key! " + e);
+            Log.get().log(Level.SEVERE, "Error while decoding peer's key " + e);
             // if this happens the client may not be a jchat client
             throw e;
         }

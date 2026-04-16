@@ -7,6 +7,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.logging.Level;
 
 public class Router {
     ArrayList<String> known_peers = new ArrayList<>();
@@ -18,6 +19,7 @@ public class Router {
     public void start_router() {
         new Thread(() -> { // seperate thread so we dont block other functions
             System.out.println("[ROUTER] Opening router socket");
+            Log.get().log(Level.INFO, "Opening router socket");
             try (ServerSocket s = new ServerSocket(5401)) {
                 s.setSoTimeout(20000);
                 int error_counter = 0; // counts the error, this part is prone to crashing
@@ -27,10 +29,12 @@ public class Router {
                     } catch (SocketTimeoutException e2) {
                         if (curr_peer_ip != null) {
                             System.out.println("[ROUTER] No incoming requests, refreshing list");
+                            Log.get().log(Level.INFO, "Refreshing router list");
                             try {
                                 request_data(curr_peer_ip);
                             } catch (IOException ie) {
                                 System.err.println("[ROUTER] Error while refreshing list " + ie);
+                                Log.get().log(Level.SEVERE, "Error refreshing router list " + ie);
                             }
                         } else {
                             System.out.println("[ROUTER] No ip to contact, in bootstrap mode.");
