@@ -98,6 +98,7 @@ public class MessageHandler {
     @SuppressWarnings("deprecation")
     public void crypt_init() throws GeneralSecurityException {
         System.out.println("[OK] Generating encryption keypair");
+        Log.get().log(Level.INFO, "Generating keys");
         TinkConfig.register();
         privateKeysetHandle = KeysetHandle.generateNew(HybridKeyTemplates.ECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256);
         publicKeysetHandle = privateKeysetHandle.getPublicKeysetHandle();

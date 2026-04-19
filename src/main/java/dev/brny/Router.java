@@ -38,14 +38,17 @@ public class Router {
                             }
                         } else {
                             System.out.println("[ROUTER] No ip to contact, in bootstrap mode.");
+                            Log.get().log(Level.INFO, "In bootstrap mode");
                         }
                     } catch (IOException e) {
                         System.err.println("[ROUTER] Router error! " + e);
+                        Log.get().log(Level.SEVERE, "Router error! " + e);
                         ++error_counter;
                     }
                 }
             } catch (IOException e) {
                 System.out.println("[ROUTER] Could not bind to port! " + e);
+                Log.get().log(Level.SEVERE, "Router failed to bind to port! " + e);
             }
         }
         ).start();
@@ -59,12 +62,15 @@ public class Router {
             PrintWriter out = new PrintWriter(c.getOutputStream(), true); // printwriter and bufferedreader for reading input, will move away later to a better method
             BufferedReader in = new BufferedReader(new InputStreamReader(c.getInputStream()));
             System.out.println("[ROUTER] Verifying handshake; Router request from " + c.getInetAddress().getHostAddress());
+            Log.get().log(Level.INFO, "Verifying handshake, request from " + c.getInetAddress().getHostAddress());
             String handshake = msg.decode(in.readLine());
             if (Objects.equals(handshake, Protocol.router_header)) {
                 out.println(msg.encode(Protocol.router_header));
+                Log.get().log(Level.INFO, "Sending header " + Protocol.router_header);
                 String response = in.readLine();
                 if (Objects.equals(response, "OK")) {
                     System.out.println("[ROUTER] Sending " + c.getInetAddress().getHostAddress() + " known peers.");
+                    Log.get().log(Level.INFO, "Handshake correct, sending known peers");
                     out.println(msg.encode(Protocol.router_header));
                     out.println(msg.encode(String.valueOf(known_peers.size())));
                     for (String ip : known_peers) {
@@ -80,6 +86,7 @@ public class Router {
                 }
             } else {
                 System.err.println("[ROUTER] Invalid handshake\nExpected: " + Protocol.router_header + "\nGot: " + handshake);
+                Log.get().log(Level.SEVERE, "Invalid router handshake, Expected: " + Protocol.router_header + " Got: " + handshake);
                 c.close();
             }
     
@@ -89,23 +96,28 @@ public class Router {
         PrintWriter out = new PrintWriter(c.getOutputStream(), true);
         BufferedReader in = new BufferedReader(new InputStreamReader(c.getInputStream()));
         System.out.println("[ROUTER] Requesting data from peer");
+        Log.get().log(Level.INFO, "Router; Requesting data from peer");
         out = new PrintWriter(c.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(c.getInputStream()));
         System.out.println("[ROUTER] Sending handshake to " + c.getInetAddress().getHostAddress());
+        Log.get().log(Level.INFO, "Router; Sending handshake to " + c.getInetAddress().getHostAddress());
         out.println(msg.encode(Protocol.router_header));
         String response = msg.decode(in.readLine());
         if (Objects.equals(response, Protocol.router_header)) {
             out.println("OK");
             System.out.println("[ROUTER] Handshake verified, receiving peers");
+            Log.get().log(Level.INFO, "Router; Handshake correct, receiving peers");
             String first_header = msg.decode(in.readLine());
             if (!Objects.equals(first_header, Protocol.router_header)) {
                 System.err.println("[ROUTER] Unexpected behaviour from peer, disconnecting");
+                Log.get().log(Level.WARNING, "Router; Unexpected behaviour from peer, disconnecting");
                 c.close();
                 return;
             }
             String size_string = msg.decode(in.readLine());
             int size = Integer.parseInt(size_string);
             int nick_size = size;
+            Log.get().log(Level.INFO, "Router; Getting " + size + " peers");
             while (size > 0) {
                 String read_data = msg.decode(in.readLine());
                 if (known_peers.contains(read_data)) {
@@ -117,9 +129,11 @@ public class Router {
                 out.println(msg.encode("OK"));
                 --size;
             }
+            Log.get().log(Level.INFO, "Router; Received IP's, getting nicknames");
             String separator = msg.decode(in.readLine());
             if (!Objects.equals(separator, "NICK")) {
                 System.err.println("[ROUTER] Unexpected behaviour from peer, disconnecting.");
+                Log.get().log(Level.WARNING, "Unexpected behaviour from peer, disconnecting.");
                 c.close();
                 return;
             }
@@ -129,6 +143,7 @@ public class Router {
                 out.println(msg.encode("OK"));
                 --nick_size;
             }
+            Log.get().log(Level.INFO, "Router; Received peer nicknames, successfully updated list, disconnecting");
             String last_header = in.readLine();
             System.out.println("[ROUTER] Successfully updated list of peers, disconnecting from peer.");
             c.close();
@@ -137,6 +152,7 @@ public class Router {
     public void add_peer(String ip, String nick) {
         known_peers.add(ip);
         peer_names.add(nick);
+        Log.get().log(Level.FINE, "Added peer " + ip + " " + nick);
     }
     @SuppressWarnings("unused")
     // to be used in a later version
@@ -144,9 +160,11 @@ public class Router {
         int index = known_peers.indexOf(ip);
         known_peers.remove(index);
         peer_names.remove(index);
+        Log.get().log(Level.FINE, "Removed peer " + ip);
     }
     public void setCurr_peer_ip(String ip) {
         Router.curr_peer_ip = ip;
+        Log.get().log(Level.FINE, "Current peer ip " + ip);
     }
     public String print_peers() throws IOException {
         if (!known_peers.isEmpty()) {

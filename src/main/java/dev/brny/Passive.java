@@ -5,6 +5,7 @@ import java.io.*;
 import java.security.GeneralSecurityException;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.logging.Level;
 
 
 // This is the class for when the user is waiting for somebody to connect to them.
@@ -17,33 +18,41 @@ public class Passive {
 
     public void start(int port, String username, Router router, MessageHandler msg) throws IOException {
             System.out.println("[OK] Opening socket");
+            Log.get().log(Level.INFO, "Opening socket");
             s = new ServerSocket(port);
             System.out.println("[INFO] IP: " + s.getInetAddress().getHostAddress());
             System.out.println("[OK] Awaiting connection");
+            Log.get().log(Level.INFO, "Awaiting connection");
             c = s.accept();
             out = new PrintWriter(c.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(c.getInputStream()));
             String handshake = msg.decode(in.readLine());
             if (Objects.equals(handshake, Protocol.header)) {
-                System.out.println("[WAIT] Handshake received, veryfing with peer. IP: " + c.getInetAddress().getHostAddress());
+                System.out.println("[WAIT] Handshake received, verifying with peer. IP: " + c.getInetAddress().getHostAddress());
+                Log.get().log(Level.INFO, "Good handshake received from " + c.getInetAddress().getHostAddress());
                 out.println(msg.encode(Protocol.header));
-                System.out.println("[OK] Handshake OK, veryfing keys");
+                System.out.println("[OK] Handshake OK, verifying keys");
+                Log.get().log(Level.INFO, "Verifying keys");
                 String other_key = msg.decode(in.readLine());
                 try {
                     msg.set_curr_key(other_key);
                 } catch (GeneralSecurityException e) {
                     System.err.println("[ERROR] Error while verifying peers key! Dropping connection, peer untrusted! " + e);
+                    Log.get().log(Level.SEVERE, "Error while verifying peers key! Dropping connection, peer untrusted! " + e);
                     stop();
                 }
                 out.println(msg.encode(msg.get_key()));
                 System.out.println("[WAIT] Waiting for peer nickname");
+                Log.get().log(Level.FINE, "Waiting for peer nickname");
                 String other_user = msg.decrypt(msg.decode(in.readLine()));
                 System.out.println("[OK] Received peer nickname: " + other_user);
                 System.out.println("[OK] Sending nickname: " + username);
+                Log.get().log(Level.INFO, "Received peer nickname " + other_user + " sending nickname " + username);
                 out.println(msg.encode(msg.encrypt(username)));
                 router.setCurr_peer_ip(c.getInetAddress().getHostAddress());
                 router.add_peer(c.getInetAddress().getHostAddress(), other_user);
                 router.add_peer(s.getInetAddress().getHostAddress(), username);
+                Log.get().log(Level.FINE, "Starting chat thread");
                 new Thread(() -> {
                     try {
                         String incoming;
@@ -53,6 +62,7 @@ public class Passive {
                         }
                     } catch (IOException e) {
                         System.err.println("[ERROR] Connection lost with peer");
+                        Log.get().log(Level.SEVERE, "Connection lost with peer");
                     }
                 }
                 ).start();
@@ -62,6 +72,7 @@ public class Passive {
                     String to_send = scan.nextLine();
                     if (Objects.equals(to_send, "/exit")) {
                         out.println(msg.wrap_msg("Peer left"));
+                        Log.get().log(Level.FINE, "Peer left");
                         stop();
                         break;
                     }
@@ -70,11 +81,13 @@ public class Passive {
             } else {
                 System.err.println("[ERROR] Invalid handshake received from client on IP: " + c.getInetAddress().getHostAddress());
                 System.err.println("Expected: " + Protocol.header + "\nGot: " + handshake);
+                Log.get().log(Level.SEVERE, "Invalid handshake from peer, expected: " + Protocol.header + " Got: " + handshake);
                 stop();
             }
 
     }
     public void stop() throws IOException {
+        Log.get().log(Level.FINE, "Closing socket");
         in.close();
         out.close();
         c.close();

@@ -3,7 +3,7 @@ package dev.brny;
 @SuppressWarnings("unused, SpellCheckingInspection")
 public class Protocol {
     final static String name_header = "JCHAT";
-    final static String version = "V0.5";
+    final static String version = "V0.6";
 
     final static String header = name_header + version;
 
@@ -34,7 +34,7 @@ public class Protocol {
 // V0.3 - Third iteration of the beta protocol, now with peer discovery
 // V0.4 - Fourth iteration of the beta protocol, uses base 64 encoding for message integrity
 // V0.5 - Fifth iteration of the beta protocol, with encryption
-// V0.6 - Sixth iteration of the beta protocol, with asking for the key every few seconds and file sharing.
+// V0.6 - Sixth iteration of the beta protocol, with file sharing
 // Ports used:
 // 5400 - Port for connecting and communicating with peers
 // 5401 - Port used for the router
