@@ -6,8 +6,16 @@ If you only want to run 1 client (e.g. when hosting a real peer) you can run the
 
 However, if you want to fully test this program out on one machine, you must use the docker image, as how the networking works. The docker image can be found at: https://hub.docker.com/r/angrypig555/jchat
 
-To run it, use the docker compose file found in src/docker
+To run it, use the docker compose file found in src/docker OR if you want the bleeding edge version, run the `devtest.sh` in the root of the git repo, but it is not guaranteed to work.
+You do not need to download any libraries or dependencies if you are running the docker version. If you are using the native jar, you need java 21.
 
+### What does it run on?
+Due to it being written in java, it technically can run on any platform. It has only been tested on linux. If it doesn't work on your platform, try out the docker version.
+
+### AI Notice
+Some small amounts AI was used with help in the making of this project.
+
+## Why over bittorrent?
 Why should you use this over bittorrent? Jchat can run on any device that can run java which, is nearly every device.
 Jchat is also very stable which means it can barely crash.
 Jchat uses hashing of every chunk to ensure the integrity of the file.
