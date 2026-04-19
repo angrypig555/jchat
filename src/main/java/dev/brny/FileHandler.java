@@ -149,6 +149,10 @@ public class FileHandler {
                     }
                     bos.flush();
                 }
+                HashCode downloaded_hash = Files.asByteSource(finalFile.toFile()).hash(Hashing.sha256());
+                if (downloaded_hash != hash_to_get) {
+                    throw new IOException("Downloaded file is corrupted, expected hash: " + hash_to_get + " file hash: " + downloaded_hash);
+                }
                 break;
             } catch (SocketTimeoutException e) {
                 System.err.println("[FILE] Peer " + ip + " timed out, removing from router");
@@ -156,6 +160,7 @@ public class FileHandler {
                 router.remove_peer(ip);
             } catch (IOException e) {
                 System.err.println(e);
+                Log.get().log(Level.SEVERE, "Error: " + e);
             }
         }
     }
@@ -163,6 +168,7 @@ public class FileHandler {
         return Hashing.sha256().hashBytes(file_chunk).asBytes();
     }
     public void start_share(File file) {
+        Log.get().log(Level.FINE, "Starting file sharing thread");
         Thread thread = new Thread(() -> {
             try {
                 share(file);

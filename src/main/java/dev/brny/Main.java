@@ -15,7 +15,7 @@ public class Main {
         Router router = new Router();
         MessageHandler msg = new MessageHandler();
         FileHandler fh = new FileHandler();
-        System.out.println("jchat V0.6\n");
+        System.out.println("jchat V1.0\n");
         System.out.print("Please enter nickname: ");
         String nick = scan.nextLine();
         Log.get().log(Level.INFO, "Nick " + nick);
