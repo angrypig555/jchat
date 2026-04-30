@@ -2,10 +2,7 @@
 jchat is a peer to peer chat application written in Java.
 You can chat and also host files.
 
-## Demo video
-<video src="https://cdn.hackclub.com/019ddf2e-132d-761c-ba1a-7dc4690e03f3/2026-04-30%2017-15-30.mp4" controls width="100%">
-  Your browser does not support the video tag, demo video unavailable.
-</video>
+[Demo video](https://cdn.hackclub.com/019ddf2e-132d-761c-ba1a-7dc4690e03f3/2026-04-30%2017-15-30.mp4)
 
 ## How to run:
 If you only want to run 1 client (e.g. when hosting a real peer) you can run the jar file like: `java -jar jchat.jar`
