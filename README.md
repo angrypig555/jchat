@@ -1,5 +1,5 @@
 > [!WARNING]  
-> jchat has not been tested on windows or macos and it is not confirmed to work on that platform.
+> jchat has not been tested on windows or macos and it is not confirmed to work on that platform. for that reason there is no binary executable for those platforms.
 # jchat
 jchat is a peer to peer chat application written in Java.
 You can chat and also host files.
