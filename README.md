@@ -1,6 +1,15 @@
+> [!WARNING]  
+> jchat has not been tested on windows or macos and it is not confirmed to work on that platform. for that reason there is no binary executable for those platforms.
 # jchat
 jchat is a peer to peer chat application written in Java.
 You can chat and also host files.
+
+## Demo Video
+
+https://github.com/user-attachments/assets/3e39ec14-1552-4a4b-963b-c081769b9528
+
+
+
 ## How to run:
 If you only want to run 1 client (e.g. when hosting a real peer) you can run the jar file like: `java -jar jchat.jar`
 
